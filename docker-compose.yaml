@@ -1,0 +1,178 @@
+version: '3.9'
+
+# Settings and configurations that are common for all containers
+x-grafana-common: &grafana-common
+  image: grafana/grafana:8.1.5
+  # restart: on-failure
+  environment:
+    - GF_SERVER_FROM_SUB_PATH=false
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+    - GF_DATABASE_URL=postgres://postgres:password@grafana-postgresql:5432/grafana?sslmode=disable
+    - GF_DATABASE_TYPE=postgres
+  depends_on:
+    grafana-postgresql:
+      condition: service_healthy
+  # volumes:
+  #   - ./res/grafana/grafana.ini:/etc/grafana/grafana.ini
+
+x-es-common: &es-common
+  image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION:-7.15.0}
+  # restart: on-failure
+  ports:
+    - 9200
+    - 9300
+  configs:
+    - source: elastic_config
+      target: /usr/share/elasticsearch/config/elasticsearch.yml
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+
+x-logstash-common: &logstash-common
+  image: docker.elastic.co/logstash/logstash:${ELK_VERSION:-7.15.0}
+  # restart: on-failure
+  ports:
+    - 5044
+    - 5000
+  configs:
+    - source: logstash_config
+      target: /usr/share/logstash/config/logstash.yml
+    - source: logstash_pipeline
+      target: /usr/share/logstash/pipeline/logstash.conf
+  environment:
+    LS_JAVA_OPT: -Xmx256m -Xms256m
+    TZ: "Asia/Ho_Chi_Minh"
+
+x-kibana-common: &kibana-common
+  image: docker.elastic.co/kibana/kibana:${ELK_VERSION:-7.15.0}
+  # restart: on-failure
+  ports:
+    - 5601
+  configs:
+    - source: kibana_config
+      target: /usr/share/kibana/config/kibana.yml
+
+configs:
+  elastic_config:
+    file: ./res/elasticsearch/elasticsearch.yml
+  logstash_config:
+    file: ./res/logstash/logstash.yml
+  logstash_pipeline:
+    file: ./res/logstash/logstash.conf
+  kibana_config:
+    file: ./res/kibana/kibana.yml
+  filebeat_config:
+    file: ./res/filebeat/filebeat.yml
+
+services:
+  es01:
+    <<: *es-common
+    hostname: es01
+    container_name: es01
+    environment:
+      - ES_JAVA_OPTS=-Xmx512m -Xms512m
+      - node.name=es01
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+    volumes:
+      - ./data/es/01:/usr/share/elasticsearch/data
+
+  es02:
+    <<: *es-common
+    hostname: es02
+    container_name: es02
+    environment:
+      - ES_JAVA_OPTS=-Xmx512m -Xms512m
+      - node.name=es02
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+    volumes:
+      - ./data/es/02:/usr/share/elasticsearch/data
+
+  es03:
+    <<: *es-common
+    hostname: es03
+    container_name: es03
+    environment:
+      - ES_JAVA_OPTS=-Xmx512m -Xms512m
+      - node.name=es03
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+    volumes:
+      - ./data/es/03:/usr/share/elasticsearch/data
+
+  logstash01:
+    <<: *logstash-common
+    hostname: logstash01
+    container_name: logstash01
+    # ports:
+    #   - 5044:5044
+    #   - 5000:5000
+
+  kibana01:
+    <<: *kibana-common
+    hostname: kibana01
+    container_name: kibana01
+    ports:
+      - 5601:5601
+
+  cerebro:
+    image: yannart/cerebro:0.8.1
+    hostname: cerebro
+    container_name: cerebro
+    restart: on-failure
+    ports:
+      - 9000:9000
+    deploy:
+      resources:
+        limits:
+          cpus: '1024'
+        reservations:
+          cpus: '1024'
+
+  grafana-postgresql:
+    image: bitnami/postgresql:11.9.0
+    hostname: grafana-postgresql
+    container_name: grafana-postgresql
+    # restart: on-failure
+    environment:
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_PASSWORD=password
+      - POSTGRESQL_DATABASE=grafana
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 5432
+    volumes:
+      - ./data/postgres:/bitnami/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana01:
+    <<: *grafana-common
+    hostname: grafana01
+    container_name: grafana01
+    ports:
+      - 3001:3000
+    volumes:
+      - ./data/grafana/01:/var/lib/grafana
+
+  filebeat:
+    container_name: filebeat
+    hostname: filebeat
+    # restart: on-failure
+    user: root
+    image: docker.elastic.co/beats/filebeat:${ELK_VERSION:-7.15.0}
+    configs:
+      - source: filebeat_config
+        target: /usr/share/filebeat/filebeat.yml
+    volumes:
+      - ./data/filebeat:/usr/share/filebeat/data
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - logstash01
+
