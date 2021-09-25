@@ -121,15 +121,15 @@ services:
     image: yannart/cerebro:0.8.1
     hostname: cerebro
     container_name: cerebro
-    restart: on-failure
+    # restart: on-failure
     ports:
       - 9000:9000
-    deploy:
-      resources:
-        limits:
-          cpus: '1024'
-        reservations:
-          cpus: '1024'
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1024'
+    #     reservations:
+    #       cpus: '1024'
 
   grafana-postgresql:
     image: bitnami/postgresql:11.9.0
