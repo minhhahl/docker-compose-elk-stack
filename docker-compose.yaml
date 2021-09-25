@@ -62,8 +62,8 @@ configs:
     file: ./res/logstash/logstash.conf
   kibana_config:
     file: ./res/kibana/kibana.yml
-  filebeat_config:
-    file: ./res/filebeat/filebeat.yml
+  filebeat_logstash_config:
+    file: ./res/filebeat/filebeat-logstash.yml
 
 services:
   es01:
@@ -171,19 +171,18 @@ services:
     volumes:
       - ./data/grafana/01:/var/lib/grafana
 
-  filebeat:
-    container_name: filebeat
-    hostname: filebeat
+  filebeat_logstash:
+    container_name: filebeat_logstash
+    hostname: filebeat_logstash
     # restart: on-failure
     user: root
     image: docker.elastic.co/beats/filebeat:${ELK_VERSION:-7.15.0}
     configs:
-      - source: filebeat_config
+      - source: filebeat_logstash_config
         target: /usr/share/filebeat/filebeat.yml
     volumes:
-      - ./data/filebeat:/usr/share/filebeat/data
+      - ./data/filebeat_logstash:/usr/share/filebeat/data
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - logstash01
-
