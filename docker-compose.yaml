@@ -71,36 +71,47 @@ services:
     hostname: es01
     container_name: es01
     environment:
+      - ELASTIC_PASSWORD=changeme
       - ES_JAVA_OPTS=-Xmx512m -Xms512m
-      - node.name=es01
-      - discovery.seed_hosts=es02,es03
-      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.type=single-node
     volumes:
       - ./data/es/01:/usr/share/elasticsearch/data
 
-  es02:
-    <<: *es-common
-    hostname: es02
-    container_name: es02
-    environment:
-      - ES_JAVA_OPTS=-Xmx512m -Xms512m
-      - node.name=es02
-      - discovery.seed_hosts=es01,es03
-      - cluster.initial_master_nodes=es01,es02,es03
-    volumes:
-      - ./data/es/02:/usr/share/elasticsearch/data
+  # es01:
+  #   <<: *es-common
+  #   hostname: es01
+  #   container_name: es01
+  #   environment:
+  #     - ES_JAVA_OPTS=-Xmx512m -Xms512m
+  #     - node.name=es01
+  #     - discovery.seed_hosts=es02,es03
+  #     - cluster.initial_master_nodes=es01,es02,es03
+  #   volumes:
+  #     - ./data/es/01:/usr/share/elasticsearch/data
 
-  es03:
-    <<: *es-common
-    hostname: es03
-    container_name: es03
-    environment:
-      - ES_JAVA_OPTS=-Xmx512m -Xms512m
-      - node.name=es03
-      - discovery.seed_hosts=es01,es02
-      - cluster.initial_master_nodes=es01,es02,es03
-    volumes:
-      - ./data/es/03:/usr/share/elasticsearch/data
+  # es02:
+  #   <<: *es-common
+  #   hostname: es02
+  #   container_name: es02
+  #   environment:
+  #     - ES_JAVA_OPTS=-Xmx512m -Xms512m
+  #     - node.name=es02
+  #     - discovery.seed_hosts=es01,es03
+  #     - cluster.initial_master_nodes=es01,es02,es03
+  #   volumes:
+  #     - ./data/es/02:/usr/share/elasticsearch/data
+
+  # es03:
+  #   <<: *es-common
+  #   hostname: es03
+  #   container_name: es03
+  #   environment:
+  #     - ES_JAVA_OPTS=-Xmx512m -Xms512m
+  #     - node.name=es03
+  #     - discovery.seed_hosts=es01,es02
+  #     - cluster.initial_master_nodes=es01,es02,es03
+  #   volumes:
+  #     - ./data/es/03:/usr/share/elasticsearch/data
 
   logstash01:
     <<: *logstash-common
@@ -156,7 +167,7 @@ services:
     hostname: grafana01
     container_name: grafana01
     ports:
-      - 3001:3000
+      - 3000:3000
     volumes:
       - ./data/grafana/01:/var/lib/grafana
 

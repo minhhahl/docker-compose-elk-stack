@@ -4,7 +4,8 @@
 #
 server.name: kibana
 server.host: 0.0.0.0
-elasticsearch.hosts: [ "http://es01:9200", "http://es02:9200", "http://es03:9200" ]
+elasticsearch.hosts: [ "http://es01:9200" ]
+# elasticsearch.hosts: [ "http://es01:9200", "http://es02:9200", "http://es03:9200" ]
 # monitoring.ui.container.elasticsearch.enabled: true
 elasticsearch.requestTimeout: 300000
 # logging.verbose: true
@@ -14,5 +15,5 @@ elasticsearch.requestTimeout: 300000
 
 ## X-Pack security credentials
 #
-# elasticsearch.username: elastic
-# elasticsearch.password: changeme
+elasticsearch.username: elastic
+elasticsearch.password: changeme

@@ -7,7 +7,7 @@ processors:
   - drop_event:
       when:
         regexp:
-          container.name: '.*(kibana|elasticsearch|logstash).*'
+          container.name: '.*(abc|def).*'
 
 filebeat.autodiscover:
   providers:
