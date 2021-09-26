@@ -15,7 +15,7 @@
 - Cerebro
 - Filebeat (collect docker logs and send to logstash)
 
-The current setup also supports run multi instances for:
+We could run multi instances for:
 
 - Logstash
 - Kibana
