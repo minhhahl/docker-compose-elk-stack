@@ -6,6 +6,7 @@ Benchmark elastic search with [rally](https://github.com/elastic/rally)
 
 - https://esrally.readthedocs.io/en/stable/command_line_reference.html#command-line-reference
 - https://esrally.readthedocs.io/en/stable/offline.html#using-tracks
+- Run with `--test-mode` to test the setup, it will use 1k documents index. Remove `--test-mode` to run full test.
 
 ```bash
 docker run \
