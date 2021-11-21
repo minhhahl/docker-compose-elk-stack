@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "description": "Really simple track",
+  "indices": [
+    {
+      "name": "index-with-one-document"
+    }
+  ],
+  "corpora": [
+    {
+      "name": "index-with-one-document",
+      "documents": [
+        {
+          "target-index": "index-with-one-document",
+          "source-file": "index-with-one-document.json",
+          "document-count": 1
+        }
+      ]
+    }
+  ],
+  "challenges": [
+    {
+      "name": "index-than-search",
+      "description": "first index one document, then search for it.",
+      "schedule": [
+        {
+          "operation": {
+            "name": "clean elasticsearch",
+            "operation-type": "delete-index"
+          }
+        },
+        {
+          "name": "create index index-with-one-document",
+          "operation": {
+            "operation-type": "create-index",
+            "index": "index-with-one-document"
+          }
+        },
+        {
+          "name": "bulk index documents into index-with-one-document",
+          "operation": {
+            "operation-type": "bulk",
+            "corpora": "index-with-one-document",
+            "indices": [
+              "index-with-one-document"
+            ],
+            "bulk-size": {{bulk_size | default(1000)}},
+            "clients": {{bulk_indexing_clients | default(1)}}
+          }
+        },
+        {
+          "operation": {
+            "name": "perform simple search",
+            "operation-type": "search",
+            "index": "index-with-one-document"
+          }
+        }
+      ]
+    }
+  ]
+}
