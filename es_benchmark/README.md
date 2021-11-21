@@ -24,6 +24,7 @@ docker run \
 
 - https://blog.searchhub.io/how-to-setup-elasticsearch-benchmarking
 - Update document in `mytrack/index-with-one-document.json`
+- Use different `bulk_size` and `bulk_indexing_clients` in `track-params` to see the performance change
 
 ```bash
 docker run \
