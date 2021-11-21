@@ -3,7 +3,8 @@
   "description": "Really simple track",
   "indices": [
     {
-      "name": "index-with-one-document"
+      "name": "index-with-one-document",
+      "body": "index.json"
     }
   ],
   "corpora": [
